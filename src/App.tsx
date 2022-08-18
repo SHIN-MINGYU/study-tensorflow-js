@@ -1,49 +1,84 @@
-import * as tf from "@tensorflow/tfjs";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import BustonHousingPrice from "./components/BostonHousingPrice";
+import SaveModel from "./components/SaveModel";
+import UseModel from "./components/UseModel";
 
 function App() {
-  const temperature = [20, 21, 22, 23];
-  const sell = [40, 42, 44, 46];
-  // tensorflow js 는 모든 분석를 텐서로 변환해서 실행해야함
-  const cause = tf.tensor(temperature);
-  const result = tf.tensor(sell);
+  const [page, setPage] = useState(<></>);
 
-  const x = tf.input({ shape: [1] }); // 모델에 입력된 값의 갯수 columns
-  const y = tf.layers.dense({ units: 1 }).apply(x); // output 값의 갯수 여기서는 sell로 표현됨
-  // apply method를 통해서 입력값과 연결이 될 것임
-  const model = tf.model({ inputs: x, outputs: y } as any); // 학습이나 예측작업을 실행 시키기 위해 변수에 입력
-  const compileParam = {
-    optimizer: tf.train.adam(),
-    loss: tf.losses.meanSquaredError,
-  };
-  model.compile(compileParam); // 모델을 만들기 확정 할떄 쓰는 메서드
-  /* 입력값 {
-      optimizer => 효율적으로 모델을 학습시키는 방법
-      loss => 모델의 정밀도 측정 방법
-    }*/
+  // 실제 현실에서는 모델을 만드는 페이지와 사용하는 페이지가 다름
+  // 모델은 nodejs 와 같은 기술을 통해서 웹브라우저에서 만들어지고 그것을 웹브라우저에서 사용함
+  // 따라서 모델을 어딘가에 보관하면 다른 웹페이지에 해당 모달을 읽을 수 있음
 
-  // 모델의 모양은 만듬. 허나
-  // 아직 모델에 데이터 입력해서 계산 방법을 만든 것은 아님
-  const fitParam = { epochs: 20000 }; // 학습을 몇번 실행 할지에 대한 options
-
-  // 데이터로 모델을 학습시킨다.
-  // model.fit => 실질적으로 학습이 일어나는 장소
-  // args : 원인, 결과, 학습 옵션
-
-  model.fit(cause, result, fitParam).then((result) => {
-    // fitParam에서 지정해준 epochs 횟수가 끝나면 result가 출력이 됨.
-    const predictResult: any = model.predict(cause); // cause => 온도 데이터를 tensor로 만든값
-
-    // predicResult 타입 => tensor
-    predictResult.print();
-    // tensor를 우리눈에 보기 좋은 형태로 표시해 줘야함.
-  });
-  const nextTem = [15, 16, 17, 18, 19];
-  const nextCause = tf.tensor(nextTem);
-  const nextResult: any = model.predict(nextCause);
-  nextResult.print();
-
-  return <div>hi</div>;
+  return (
+    <div
+      style={{
+        display: "flex",
+        flex: "1 1 auto",
+        flexDirection: "row",
+        height: "100vh",
+        width: "100vw",
+        flexWrap: "wrap",
+        overflow: "hidden",
+      }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",
+          flexBasis: "14%",
+          border: "1px solid black",
+        }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            height: "10%",
+          }}>
+          <h3 style={{ margin: "auto" }}>TensorFlow 練習</h3>
+        </div>
+        <span style={{ width: "100%", border: "1px solid grey" }}></span>
+        <a
+          href="#"
+          onClick={() =>
+            setPage(() => {
+              return <SaveModel></SaveModel>;
+            })
+          }>
+          save Model
+        </a>
+        <a
+          href="#"
+          onClick={() =>
+            setPage(() => {
+              return <UseModel></UseModel>;
+            })
+          }>
+          use Model
+        </a>
+        <a
+          href="#"
+          onClick={() =>
+            setPage(() => {
+              return <BustonHousingPrice></BustonHousingPrice>;
+            })
+          }>
+          BostonHousingPrice
+        </a>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          flexWrap: "wrap",
+          minHeight: "100vh",
+          flexBasis: "85%",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+        children={page}></div>
+    </div>
+  );
 }
 
 export default App;
