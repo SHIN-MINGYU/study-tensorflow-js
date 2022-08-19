@@ -3,28 +3,24 @@ import * as tf from "@tensorflow/tfjs";
 import * as tfvis from "@tensorflow/tfjs-vis";
 import { bostonCause, bostonResult } from "../data/BostonHousingPrice";
 
-export default function BustonHousingPrice() {
+export default function HiddenLayer() {
   const [model, setModel] = useState<tf.LayersModel>();
-  // 중앙값 ?
-  // 10000, 20000 ,30000, 40000, 60000 이 있을떄
-  // 3만이 중앙 값이다. => 평균은 아니지만 가장 중간에 있는 값임.
-
-  // table row
-
-  // CRIM : 범죄율
-  // CHAS : 강변(TRUE FALSE)
-  // MEDV : 집값
-  // RIM : 평균 방의 갯수
-  // LSTAT : 하위계층 비율
-  // TAX : 제산세 비율
-  // PTRATIO : 학생 교사의 비율
 
   useEffect(() => {
     const cause = tf.tensor(bostonCause);
     const result = tf.tensor(bostonResult);
 
-    const x = tf.input({ shape: [13] });
-    const y = tf.layers.dense({ units: 1 }).apply(x);
+    const x = tf.input({ shape: [13] }); // 입력층
+    const h1 = tf.layers.dense({ units: 13, activation: "relu" }).apply(x); // 은닉층
+    // node또는 weight는 몇개인가를 dense안에 있는 object에 입력
+    // 보통은 입력층과 출력층 사이의 값을 입력
+    // activation function을 지정해야함 뭘쓸진 모르겠을 떄는 relu쓰자
+    const h2 = tf.layers.dense({ units: 13, activation: "relu" }).apply(h1); // 은닉층
+
+    // 아주많은 문제들은 은닉층 하나 로도 충분하지만
+    // 하나로도 해결되지 않는 문제들이 있을 경우에는 하나씩 추가해나가면 좋을듯
+
+    const y = tf.layers.dense({ units: 1 }).apply(h2); // 출력층
 
     const model = tf.model({ inputs: x, outputs: y } as any);
     const compileParam = {
@@ -69,10 +65,5 @@ export default function BustonHousingPrice() {
       setModel(() => model);
     });
   }, []);
-
-  return (
-    <div>
-      <img src="/src/assets/BostonHousingPrice.png"></img>
-    </div>
-  );
+  return <div></div>;
 }

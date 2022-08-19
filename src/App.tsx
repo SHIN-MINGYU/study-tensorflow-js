@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import BustonHousingPrice from "./components/BostonHousingPrice";
+import HiddenLayer from "./components/HiddenLayer";
 import SaveModel from "./components/SaveModel";
 import UseModel from "./components/UseModel";
 
@@ -65,7 +66,17 @@ function App() {
           }>
           BostonHousingPrice
         </a>
+        <a
+          href="#"
+          onClick={() =>
+            setPage(() => {
+              return <HiddenLayer></HiddenLayer>;
+            })
+          }>
+          HiddenLayer
+        </a>
       </div>
+
       <div
         style={{
           display: "flex",
