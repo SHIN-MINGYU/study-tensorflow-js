@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import BustonHousingPrice from "./components/BostonHousingPrice";
+import DetectFace from "./components/DetectFace";
 import HiddenLayer from "./components/HiddenLayer";
 import SaveModel from "./components/SaveModel";
 import UseModel from "./components/UseModel";
@@ -74,6 +75,24 @@ function App() {
             })
           }>
           HiddenLayer
+        </a>
+        <a
+          href="#"
+          onClick={() =>
+            setPage(() => {
+              return <HiddenLayer></HiddenLayer>;
+            })
+          }>
+          HiddenLayer
+        </a>
+        <a
+          href="#"
+          onClick={() =>
+            setPage(() => {
+              return <DetectFace></DetectFace>;
+            })
+          }>
+          DetectFace
         </a>
       </div>
 
