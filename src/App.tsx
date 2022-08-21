@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
+import * as tf from "@tensorflow/tfjs-core";
+import "@tensorflow/tfjs-backend-webgl";
 import BustonHousingPrice from "./components/BostonHousingPrice";
 import DetectFace from "./components/DetectFace";
 import HiddenLayer from "./components/HiddenLayer";
 import SaveModel from "./components/SaveModel";
 import UseModel from "./components/UseModel";
+import DetectFaceMesh from "./components/DetectFaceMesh";
 
 function App() {
   const [page, setPage] = useState(<></>);
+
+  const init = async () => {
+    await tf.setBackend("webgl");
+  };
+
+  useEffect(() => {
+    init();
+  }, []);
 
   // 실제 현실에서는 모델을 만드는 페이지와 사용하는 페이지가 다름
   // 모델은 nodejs 와 같은 기술을 통해서 웹브라우저에서 만들어지고 그것을 웹브라우저에서 사용함
@@ -93,6 +104,15 @@ function App() {
             })
           }>
           DetectFace
+        </a>
+        <a
+          href="#"
+          onClick={() =>
+            setPage(() => {
+              return <DetectFaceMesh></DetectFaceMesh>;
+            })
+          }>
+          DetectFaceMesh
         </a>
       </div>
 

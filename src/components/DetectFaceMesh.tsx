@@ -1,19 +1,31 @@
-import { RefObject, useEffect, useRef, useState } from "react";
-import "@mediapipe/face_detection";
+import { useEffect, useRef, useState } from "react";
+import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detection";
 
-// Register WebGL backend.
-import "@tensorflow/tfjs-backend-webgl";
-import * as faceDetection from "@tensorflow-models/face-detection";
+import "@mediapipe/face_mesh";
 import { connectToVideo, render } from "../utils/faceDetectorHelper";
 
-export default function DetectFace() {
+export default function DetectFaceMesh() {
   const myVideo = useRef<HTMLVideoElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const [model, setModel] = useState<faceDetection.SupportedModels>(
-    faceDetection.SupportedModels.MediaPipeFaceDetector
+  const model = useRef<faceLandmarksDetection.SupportedModels>(
+    faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh
   );
+  const [detector, setDetector] =
+    useState<faceLandmarksDetection.FaceLandmarksDetector>();
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
-  const [detector, setDetector] = useState<faceDetection.FaceDetector>();
+
+  const init = async () => {
+    if (!canvas.current) return;
+
+    const detectorConfig = {
+      runtime: "tfjs",
+    } as faceLandmarksDetection.MediaPipeFaceMeshTfjsModelConfig;
+
+    setDetector(
+      await faceLandmarksDetection.createDetector(model.current, detectorConfig)
+    );
+    setCtx(canvas.current.getContext("2d"));
+  };
 
   const connect = async () => {
     if (!ctx || !canvas.current || !detector) return;
@@ -24,20 +36,6 @@ export default function DetectFace() {
     connectToVideo(myVideo, stream, { ctx, canvas: canvas.current, detector });
   };
 
-  const init = async () => {
-    const video = myVideo.current;
-    if (!video) {
-      alert("vidoe components is not called");
-      return;
-    }
-    setDetector(
-      await faceDetection.createDetector(model!, {
-        runtime: "tfjs",
-      })
-    );
-    setCtx(canvas.current!.getContext("2d"));
-  };
-
   useEffect(() => {
     init();
   }, []);
@@ -45,7 +43,6 @@ export default function DetectFace() {
   useEffect(() => {
     ctx && connect();
   }, [ctx]);
-
   return (
     <div style={{ position: "relative" }}>
       <video
