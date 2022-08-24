@@ -4,24 +4,29 @@ import "@mediapipe/face_detection";
 // Register WebGL backend.
 import "@tensorflow/tfjs-backend-webgl";
 import * as faceDetection from "@tensorflow-models/face-detection";
-import { connectToVideo, render } from "../utils/faceDetectorHelper";
+import { connectToVideo } from "../utils/faceDetectorHelper";
 
 export default function DetectFace() {
   const myVideo = useRef<HTMLVideoElement>(null);
-  const canvas = useRef<HTMLCanvasElement>(null);
+  const videoCanvas = useRef<HTMLCanvasElement>(null);
+  const effectCanvas = useRef<HTMLCanvasElement>(null);
   const [model, setModel] = useState<faceDetection.SupportedModels>(
     faceDetection.SupportedModels.MediaPipeFaceDetector
   );
-  const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
+
   const [detector, setDetector] = useState<faceDetection.FaceDetector>();
 
   const connect = async () => {
-    if (!ctx || !canvas.current || !detector) return;
+    if (!videoCanvas.current || !detector || !effectCanvas.current) return;
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
     });
-    connectToVideo(myVideo, stream, { ctx, canvas: canvas.current, detector });
+    connectToVideo(myVideo, stream, {
+      videoCanvas: videoCanvas.current,
+      effectCanvas: effectCanvas.current,
+      detector,
+    });
   };
 
   const init = async () => {
@@ -35,7 +40,6 @@ export default function DetectFace() {
         runtime: "tfjs",
       })
     );
-    setCtx(canvas.current!.getContext("2d"));
   };
 
   useEffect(() => {
@@ -43,8 +47,8 @@ export default function DetectFace() {
   }, []);
 
   useEffect(() => {
-    ctx && connect();
-  }, [ctx]);
+    detector && connect();
+  }, [detector]);
 
   return (
     <div style={{ position: "relative" }}>
@@ -58,7 +62,15 @@ export default function DetectFace() {
           width: "auto",
           height: "auto",
         }}></video>
-      <canvas ref={canvas} width="600" height={400}></canvas>
+      <canvas ref={videoCanvas} width="600" height="400"></canvas>
+      <canvas
+        ref={effectCanvas}
+        width="600"
+        height="400"
+        style={{
+          position: "absolute",
+          transform: "translateX(-100%)",
+        }}></canvas>
     </div>
   );
 }
