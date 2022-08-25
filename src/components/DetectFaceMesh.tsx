@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  ChangeEvent,
+  MouseEvent,
+  MouseEventHandler,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detection";
 
 import "@mediapipe/face_mesh";
@@ -11,6 +18,14 @@ export default function DetectFaceMesh() {
   const model = useRef<faceLandmarksDetection.SupportedModels>(
     faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh
   );
+
+  const [renderType, setRenderType] = useState<{ [key: string]: boolean }>({
+    box: true,
+    rect: true,
+    mesh: true,
+    eye: true,
+  });
+
   const [detector, setDetector] =
     useState<faceLandmarksDetection.FaceLandmarksDetector>();
 
@@ -35,16 +50,49 @@ export default function DetectFaceMesh() {
       videoCanvas: videoCanvas.current,
       effectCanvas: effectCanvas.current,
       detector,
+      renderType,
     });
   };
 
+  const onClick = (e: MouseEvent<HTMLInputElement>) => {
+    const target = e.currentTarget;
+    setRenderType((prevState) => {
+      const newState: { [key: string]: boolean } = {};
+      for (let key of Object.keys(prevState)) {
+        if (key === target.value) {
+          newState[key] = !prevState[key];
+        } else {
+          newState[key] = prevState[key];
+        }
+      }
+      return newState;
+    });
+  };
+
+  const renderRadioButton = (items: Array<string>) => {
+    return items.map((key, index) => {
+      return (
+        <span key={key}>
+          <input
+            onChange={() => {}}
+            onClick={onClick}
+            id={`${index}`}
+            type="radio"
+            value={key}
+            checked={renderType[key]}
+          />
+          <label htmlFor={`#${index}`}>{key}</label>
+        </span>
+      );
+    });
+  };
   useEffect(() => {
     init();
   }, []);
 
   useEffect(() => {
     detector && connect();
-  }, [detector]);
+  }, [detector, renderType]);
 
   return (
     <div style={{ position: "relative" }}>
@@ -67,6 +115,7 @@ export default function DetectFaceMesh() {
           position: "absolute",
           transform: "translateX(-100%)",
         }}></canvas>
+      <div>{renderRadioButton(Object.keys(renderType))}</div>
     </div>
   );
 }
