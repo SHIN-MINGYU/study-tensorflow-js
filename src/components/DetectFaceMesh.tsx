@@ -1,11 +1,4 @@
-import {
-  ChangeEvent,
-  MouseEvent,
-  MouseEventHandler,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { MouseEvent, useEffect, useRef, useState } from "react";
 import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detection";
 
 import "@mediapipe/face_mesh";
@@ -30,7 +23,7 @@ export default function DetectFaceMesh() {
     useState<faceLandmarksDetection.FaceLandmarksDetector>();
 
   const init = async () => {
-    if (!videoCanvas.current) return;
+    if (!videoCanvas.current || !effectCanvas.current) return;
     const detectorConfig = {
       runtime: "tfjs",
     } as faceLandmarksDetection.MediaPipeFaceMeshTfjsModelConfig;

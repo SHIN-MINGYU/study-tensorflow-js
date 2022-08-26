@@ -3,6 +3,8 @@ import { BoundingBox } from "@tensorflow-models/face-detection/dist/shared/calcu
 import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detection";
 import { RefObject } from "react";
 import { TRIANGULATION } from "../../data/TRIANGULATATION";
+import * as THREE from "three";
+import renderEffectThree from "./threeEffectRenderer";
 
 // ======================================================================================================
 let renderID: number | undefined = undefined;
@@ -38,8 +40,8 @@ export const renderEffect = async (
       if (renderType) {
         renderType.box && drawBox(effectContext, box);
         // renderType.rect && drawRect(effectContext, keypoints);
-        // renderType.mesh && drawMesh(effectContext, keypoints);
-        drawEyeEffect(effectContext, keypoints);
+        renderType.mesh && drawMesh(effectContext, keypoints);
+        renderType.eye && drawEyeEffect(effectContext, keypoints);
         // drawFaceCover(effectContext, keypoints);
       } else {
         drawBox(effectContext, box);
@@ -247,21 +249,48 @@ export const connectToVideo = (
   const video = ref.current;
 
   const { videoCanvas, effectCanvas, detector, renderType } = config;
+
+  const renderer = new THREE.WebGLRenderer({
+    canvas: effectCanvas,
+    alpha: true,
+  });
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 2000);
+  camera.position.x = 600 / 2;
+  camera.position.y = -400 / 2;
+  camera.position.z = -200 / Math.tan(45 / 2);
+
+  const scene = new THREE.Scene();
+  scene.add(new THREE.AmbientLight(0xcccccc, 0.4));
+  camera.add(new THREE.PointLight(0xffffff, 0.8));
+  scene.add(camera);
+
+  camera.lookAt(300, -200, 0);
+
   const videoContext = videoCanvas.getContext("2d");
+
   video.muted = true;
   video.srcObject = stream;
+
   video.onloadedmetadata = () => {
     video.play();
     renderVideo(videoContext!, video);
+    renderer.render(scene, camera);
   };
+
   video.oncanplaythrough = () => {
-    renderID && cancelAnimationFrame(renderID);
+    const renderOption = {
+      renderer,
+      scene,
+      camera,
+    };
+    renderEffectThree(effectCanvas, detector, videoCanvas, renderOption);
+    /*  renderID && cancelAnimationFrame(renderID);
     renderEffect(
       videoContext!,
       videoCanvas,
       effectCanvas,
       detector,
       renderType
-    );
+    ); */
   };
 };
